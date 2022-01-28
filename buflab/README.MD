@@ -49,7 +49,7 @@ void test()
 | - - - - - - - - - - | ----
 |         ...         | caller's frame
 | - - - - - - - - - - |
-| 	   argument n     |
+|      argument n     |
 | - - - - - - - - - - |
 |         ...         |
 | - - - - - - - - - - |
@@ -61,13 +61,13 @@ void test()
 | - - - - - - - - - - |
 |   saved registers   |
 | - - - - - - - - - - |
-| 	    local n       |
+|       local n       |
 | - - - - - - - - - - |
 |         ...         |
 | - - - - - - - - - - |
 |       local 1       |
 | - - - - - - - - - - |
-| 	   argument n     |
+|      argument n     |
 | - - - - - - - - - - |
 |         ...         |
 | - - - - - - - - - - |

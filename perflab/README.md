@@ -23,10 +23,10 @@ void naive_rotate(int dim, pixel *src, pixel *dst)
 
 ```
 Rotate: Version = naive_rotate: Naive baseline implementation:
-Dim				64		128		256		512		1024	Mean
-Your CPEs		1.4		1.5		3.7		5.5		7.7
+Dim		64	128	256	512	1024	Mean
+Your CPEs	1.4	1.5	3.7	5.5	7.7
 Baseline CPEs	14.7	40.1	46.4	65.9	94.5
-Speedup			10.3	26.3	12.7	12.0	12.2	13.8
+Speedup		10.3	26.3	12.7	12.0	12.2	13.8
 ```
 
 ##### Reusing Computation Result
@@ -53,10 +53,10 @@ void rotate(int dim, pixel *src, pixel *dst)
 
 ```
 Rotate: Version = rotate: Current working version:
-Dim				64		128		256		512		1024	Mean
-Your CPEs		1.3		1.5		3.6		5.3		7.6
+Dim		64	128	256	512	1024	Mean
+Your CPEs	1.3	1.5	3.6	5.3	7.6
 Baseline CPEs	14.7	40.1	46.4	65.9	94.5
-Speedup			11.5	27.3	13.0	12.5	12.4	14.4
+Speedup		11.5	27.3	13.0	12.5	12.4	14.4
 ```
 
 ##### Cache Accessing Optimization
@@ -96,10 +96,10 @@ void rotate(int dim, pixel *src, pixel *dst)
 
 ```
 Rotate: Version = rotate: Current working version:
-Dim				64		128		256		512		1024	Mean
-Your CPEs		1.1		1.1		1.1		1.5		2.0
+Dim		64	128	256	512	1024	Mean
+Your CPEs	1.1	1.1	1.1	1.5	2.0
 Baseline CPEs	14.7	40.1	46.4	65.9	94.5
-Speedup			13.2	35.9	43.6	44.3	46.8	33.6
+Speedup		13.2	35.9	43.6	44.3	46.8	33.6
 ```
 
 ### 2. Smooth
@@ -176,10 +176,10 @@ void naive_smooth(int dim, pixel *src, pixel *dst)
 
 ```
 Smooth: Version = naive_smooth: Naive baseline implementation:
-Dim				32		64		128		256		512		Mean
-Your CPEs		44.1	44.4	41.4	46.1	46.7
+Dim		32	64	128	256	512	Mean
+Your CPEs	44.1	44.4	41.4	46.1	46.7
 Baseline CPEs	695.0	698.0	702.0	717.0	722.0
-Speedup			15.7	15.7	17.0	15.6	15.4	15.9
+Speedup		15.7	15.7	17.0	15.6	15.4	15.9
 ```
 
 According to the definition of $Avg$, we can Classify pixels into three categories.
@@ -350,9 +350,9 @@ void smooth(int dim, pixel *src, pixel *dst)
 
 ```
 Smooth: Version = smooth: Current working version:
-Dim				32		64		128		256		512		Mean
-Your CPEs		9.8		12.4	10.9	10.5	10.6
+Dim		32	64	128	256	512	Mean
+Your CPEs	9.8	12.4	10.9	10.5	10.6
 Baseline CPEs	695.0	698.0	702.0	717.0	722.0
-Speedup			71.1	56.4	64.1	68.3	68.0	65.4
+Speedup		71.1	56.4	64.1	68.3	68.0	65.4
 ```
 
