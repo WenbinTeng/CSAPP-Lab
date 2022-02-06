@@ -4,9 +4,8 @@
 
 Matrix rotation can be described as
 
-$$
- A(i,j)=A(j,i), \space 0 \leq i,j \leq n 
-$$
+<img src="https://latex.codecogs.com/svg.image?A(i,j)=A(j,i),&space;\space&space;0&space;\leq&space;i,j&space;\leq&space;n&space;" title="A(i,j)=A(j,i), \space 0 \leq i,j \leq n " />
+
 , which naive baseline is shown below.
 
 ```c
@@ -31,7 +30,11 @@ Speedup		10.3	26.3	12.7	12.0	12.2	13.8
 
 ##### Reusing Computation Result
 
-For every inner iteration, $i \times n$ will be computed repeatedly, which causes performance loss. We can put the computation of $i \times n$ outside of the inner loop.
+For every inner iteration,
+<img src="https://latex.codecogs.com/svg.image?i&space;\times&space;n" title="i \times n" />
+will be computed repeatedly, which causes performance loss. We can put the computation of
+<img src="https://latex.codecogs.com/svg.image?i&space;\times&space;n" title="i \times n" />
+outside of the inner loop.
 
 ```c
 void rotate(int dim, pixel *src, pixel *dst) 
@@ -61,12 +64,11 @@ Speedup		11.5	27.3	13.0	12.5	12.4	14.4
 
 ##### Cache Accessing Optimization
 
-For a large dimension matrix, the memory access of $dst$ and $src$ will take long strides. We can unroll the inner loop to fit the size of cache. For computation convenience, we can simply unroll the parentheses like
+For a large dimension matrix, the memory access of `dst` and `src` will take long strides. We can unroll the inner loop to fit the size of cache. For computation convenience, we can simply unroll the parentheses like
 
-$$
-dst((n-1-j) \times n + i) = src(i \times n + j) \iff dst((n \times n - n) + i - j \times n) = src(i \times n + j)
-$$
-.We set the base address $n^2 - n$ to $dst$ and $0$ to $src$, and decrease $n$ for $dst$ and increase $1$ for $src$ in a inner loop iteration.
+<img src="https://latex.codecogs.com/svg.image?dst((n-1-j)&space;\times&space;n&space;&plus;&space;i)&space;\iff&space;dst((n&space;\times&space;n&space;-&space;n)&space;&plus;&space;i&space;-&space;j&space;\times&space;n)" title="dst((n-1-j) \times n + i) \iff dst((n \times n - n) + i - j \times n)" />
+
+.We set the base address `n^2-n` to `dst` and `0` to `src`, and decrease `n` for `dst` and increase `1` for `src` in a inner loop iteration.
 
 ```c
 void rotate(int dim, pixel *src, pixel *dst)
@@ -105,11 +107,9 @@ Speedup		13.2	35.9	43.6	44.3	46.8	33.6
 ### 2. Smooth
 
 The smooth value of an element in matrix is defined as 
-$$
-Smooth(A(i,j)) = \frac{1}{\sum e(i,j)} \sum_{s=-1}^1 \sum_{t=-1}^1 A(i+s,j+t) \\
-A(i,j)=0, \ if \ i<1 \ or \ i>n \ or \ j<1 \ or \ j>n \\
-e(i,j)=1, \ if \ 1 \leq i,j \leq n
-$$
+
+<img src="https://latex.codecogs.com/svg.image?Smooth(A(i,j))&space;=&space;\frac{1}{\sum&space;e(i,j)}&space;\sum_{s=-1}^1&space;\sum_{t=-1}^1&space;A(i&plus;s,j&plus;t),&space;\&space;subject&space;\&space;to\begin{cases}A(i,j)=0,&space;\&space;if&space;\&space;i<1&space;\&space;or&space;\&space;i>n&space;\&space;or&space;\&space;j<1&space;\&space;or&space;\&space;j>n&space;\\e(i,j)=1,&space;\&space;if&space;\&space;1&space;\leq&space;i,j&space;\leq&space;n\end{cases}" title="Smooth(A(i,j)) = \frac{1}{\sum e(i,j)} \sum_{s=-1}^1 \sum_{t=-1}^1 A(i+s,j+t), \ subject \ to\begin{cases}A(i,j)=0, \ if \ i<1 \ or \ i>n \ or \ j<1 \ or \ j>n \\e(i,j)=1, \ if \ 1 \leq i,j \leq n\end{cases}" />
+
 , which naive baseline is shown below.
 
 ```c
@@ -182,34 +182,11 @@ Baseline CPEs	695.0	698.0	702.0	717.0	722.0
 Speedup		15.7	15.7	17.0	15.6	15.4	15.9
 ```
 
-According to the definition of $Avg$, we can Classify pixels into three categories.
-$$
-pixels
-\begin{cases}
-center \ pixels \\
-others
-	\begin{cases}
-	edges
-		\begin{cases}
-		top \\
-		down \\
-		left \\
-		right
-		\end{cases}
-		\\
-	corners
-		\begin{cases}
-		upper \ left \\
-		upper \ right \\
-		lower \ left \\
-		lower \ right \\
-		\end{cases}
-	\end{cases}
-\end{cases}
-$$
+According to the definition of Smooth, we can classify pixels into three categories.
 
+<img src="https://latex.codecogs.com/svg.image?pixels\begin{cases}center&space;\&space;pixels&space;\\others&space;\begin{cases}&space;edges&space;&space;\begin{cases}&space;&space;top&space;\\&space;&space;down&space;\\&space;&space;left&space;\\&space;&space;right&space;&space;\end{cases}&space;&space;\\&space;corners&space;&space;\begin{cases}&space;&space;upper&space;\&space;left&space;\\&space;&space;upper&space;\&space;right&space;\\&space;&space;lower&space;\&space;left&space;\\&space;&space;lower&space;\&space;right&space;\\&space;&space;\end{cases}&space;\end{cases}\end{cases}" title="pixels\begin{cases}center \ pixels \\others \begin{cases} edges \begin{cases} top \\ down \\ left \\ right \end{cases} \\ corners \begin{cases} upper \ left \\ upper \ right \\ lower \ left \\ lower \ right \\ \end{cases} \end{cases}\end{cases}" />
 
-Then we can avoid using $min$ and $max$ in every loop iteration, which will bring the consumption of branch prediction. The code after unrolling is shown below.
+Then we can avoid using `min` and `max` in every loop iteration, which will bring the consumption of branch prediction. The code after unrolling is shown below.
 
 ```c
 void smooth(int dim, pixel *src, pixel *dst)
