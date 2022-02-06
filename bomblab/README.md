@@ -2,13 +2,13 @@
 
 ### Main
 
-According to the partial source code shown in `bomb.c`, we can learn that pattern bomb check input and explode.
+According to the partial source code shown in `bomb.c`, the bomb will check input and explode.
 
 ```c
 ...
 input = read_line();	/* Get input                   */
-phase_1(input);    		/* Run the phase               */
-phase_defused();		/* Drat!  They figured it out! */
+phase(input);    	/* Run the phase               */
+phase_defused();	/* Drat!  They figured it out! */
 ...
 ```
 
@@ -134,12 +134,19 @@ $1 = 0x4025cf "%d %d"
 According to `0x400f75~0x400fab`, this is a classic switch-style code. For every item in switch table, it compares a constant number with `0xc(%rsp)`, then explode if they are not equal. So we can get all valid inputs.
 
 "**<u>0 207</u>**"
+
 "**<u>2 707</u>**"
+
 "**<u>3 256</u>**"
+
 "**<u>4 389</u>**"
+
 "**<u>5 206</u>**"
+
 "**<u>6 682</u>**"
+
 "**<u>7 327</u>**"
+
 "**<u>1 311</u>**" (default)
 
 ```
@@ -216,7 +223,7 @@ Through assembly code of `func4`, we can learn that this is recursive. Based on 
 ```c
 int func4(a, b, d)
 {
-	r = d - b;
+    r = d - b;
     c = (unsigned)r >> 31;
     r = (c + r) >> 1;
     c = r + b;
