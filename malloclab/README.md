@@ -25,12 +25,12 @@
 ##### Segregated Free List
 
 ```
-.headers			.blocks
-| (  0, 32] | ->	|*|					-> |*| 					-> ...
-| ( 32, 64] | ->  	|**|				-> |**| 				-> ...
-| ( 64,128] | ->  	|****|				-> |****| 				-> ...
-| (128,256] | ->  	|********|			-> |********| 			-> ...
-| (256,512] | ->  	|****************|	-> |****************| 	-> ...
+.headers            .blocks
+| (  0, 32] | ->    |*|                 -> |*|                  -> ...
+| ( 32, 64] | ->    |**|                -> |**|                 -> ...
+| ( 64,128] | ->    |****|              -> |****|               -> ...
+| (128,256] | ->    |********|          -> |********|           -> ...
+| (256,512] | ->    |****************|  -> |****************|   -> ...
 ...
 ```
 
@@ -123,30 +123,8 @@ int mm_init(void)
 ##### Memory Allocation
 
 Given a allocation request with `size`, find a appropriate free block.
-$$
-Allocate
-\begin{cases}
-size=0 & \rightarrow NULL \\
-0 < size \leq 2 \times DSIZE & \rightarrow 2 \times DSIZE \\
-size > 2 \times DSIZE & \rightarrow BESTFIT(size)
-\end{cases}
-$$
 
-$$
-Find \ free \ list
-\begin{cases}
-	Found & \rightarrow
-		\begin{cases}
-			rest \leq 2 \times DSIZE & \rightarrow Fill, \ then \ allocate \\
-			rest > 2 \times DSIZE & \rightarrow Split, \ then \ allocate
-		\end{cases} \\
-	Not \ found & \rightarrow
-		\begin{cases}
-			Not \ in \ largest \ interval  & \rightarrow Goto \ next \ interval \\
-			In \ largest \ interval & \rightarrow Allocate \ a \ new \ block \ in \ heap
-		\end{cases}
-\end{cases}
-$$
+<img src="https://latex.codecogs.com/svg.image?Allocate\begin{cases}&space;size=0&space;&&space;\rightarrow&space;NULL&space;\\&space;0&space;<&space;size&space;\leq&space;2&space;\times&space;DSIZE&space;&&space;\rightarrow&space;2&space;\times&space;DSIZE&space;\\&space;size&space;>&space;2&space;\times&space;DSIZE&space;&&space;\rightarrow&space;BestFit(size)&space;\begin{cases}&space;Found&space;&&space;\rightarrow&space;\begin{cases}&space;rest&space;\leq&space;2&space;\times&space;DSIZE&space;&&space;\rightarrow&space;Fill,&space;\&space;then&space;\&space;allocate&space;\\&space;rest&space;>&space;2&space;\times&space;DSIZE&space;&&space;\rightarrow&space;Split,&space;\&space;then&space;\&space;allocate&space;\end{cases}&space;\\&space;Not&space;\&space;found&space;&&space;\rightarrow&space;\begin{cases}&space;Not&space;\&space;in&space;\&space;largest&space;\&space;interval&space;&space;&&space;\rightarrow&space;Goto&space;\&space;next&space;\&space;interval&space;\\&space;In&space;\&space;largest&space;\&space;interval&space;&&space;\rightarrow&space;Allocate&space;\&space;a&space;\&space;new&space;\&space;block&space;\&space;in&space;\&space;heap&space;\end{cases}&space;\end{cases}&space;\end{cases}" title="Allocate\begin{cases} size=0 & \rightarrow NULL \\ 0 < size \leq 2 \times DSIZE & \rightarrow 2 \times DSIZE \\ size > 2 \times DSIZE & \rightarrow BestFit(size) \begin{cases} Found & \rightarrow \begin{cases} rest \leq 2 \times DSIZE & \rightarrow Fill, \ then \ allocate \\ rest > 2 \times DSIZE & \rightarrow Split, \ then \ allocate \end{cases} \\ Not \ found & \rightarrow \begin{cases} Not \ in \ largest \ interval & \rightarrow Goto \ next \ interval \\ In \ largest \ interval & \rightarrow Allocate \ a \ new \ block \ in \ heap \end{cases} \end{cases} \end{cases}" />
 
 ```c
 /* 
