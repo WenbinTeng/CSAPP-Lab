@@ -8,7 +8,7 @@ This is a repository of notes and solutions for *Computer Systems: A Programmer'
 | ---------------- | ---------------------------------------------------- |
 | Data Lab         | ![1](https://img.shields.io/badge/-Done-brightgreen) |
 | Bomb Lab         | ![1](https://img.shields.io/badge/-Done-brightgreen) |
-| Buffer Lab       | ![1](https://img.shields.io/badge/-Part-important)   |
+| Buffer Lab       | ![1](https://img.shields.io/badge/-Done-brightgreen) |
 | Architecture Lab | ![1](https://img.shields.io/badge/-Done-brightgreen) |
 | Cache Lab        | ![1](https://img.shields.io/badge/-Done-brightgreen) |
 | Performance Lab  | ![1](https://img.shields.io/badge/-Done-brightgreen) |
